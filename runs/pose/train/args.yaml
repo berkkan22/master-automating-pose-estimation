@@ -13,7 +13,7 @@ cache: false
 device: null
 workers: 8
 project: null
-name: train
+name: train2
 exist_ok: false
 pretrained: true
 optimizer: auto
@@ -103,4 +103,4 @@ auto_augment: randaugment
 erasing: 0.4
 cfg: null
 tracker: botsort.yaml
-save_dir: /data/9katirci/master-automating-pose-estimation/runs/pose/train
+save_dir: /data/9katirci/master-automating-pose-estimation/runs/pose/train2

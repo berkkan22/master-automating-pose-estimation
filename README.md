@@ -48,7 +48,18 @@
   - dataset: trudi_ds
   - model: yolo11n-seg.yaml
 
-- `segment/train4` synthetic data
-  - 
+- `pose/train` synthetic data
+  - 700 epochs, (but canceled at 422 because no improvement in the last 100 runs)
+  - 1280 image size
+  - training with 1 class
+  - dataset: synthetic_data-v2
+  - model: yolo11n-pose.pt
+
+- `pose/train2` synthetic data
+  - 700 epochs, (but canceled at 639 because no improvement in the last 100 runs)
+  - 1280 image size
+  - training with 1 class
+  - dataset: synthetic_data-v2
+  - model: yolo11n-pose.yaml
 
 The validation results are in the `./results/` folder as well as in `./runs/segment/val*`

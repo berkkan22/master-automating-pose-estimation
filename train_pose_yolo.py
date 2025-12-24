@@ -1,7 +1,7 @@
 from ultralytics import YOLO
 
 # Load a model
-model = YOLO("yolo11n-pose.pt")  # build a new model from YAML
+model = YOLO("yolo11n-pose.yaml")  # build a new model from YAML
 
 # load a pretrained model (recommended for training)
 # model = YOLO("yolo11n-seg.pt")

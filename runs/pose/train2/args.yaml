@@ -1,6 +1,6 @@
 task: pose
 mode: train
-model: yolo11n-pose.pt
+model: yolo11n-pose.yaml
 data: synthetic_data-v2_keypoints.yaml
 epochs: 700
 time: null
