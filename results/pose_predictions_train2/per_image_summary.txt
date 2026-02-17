@@ -1,0 +1,11 @@
+image; gt_counts; pred_counts
+0; GT: {0: 9}; Pred: {0: 9}
+1; GT: {0: 6}; Pred: {0: 6}
+2; GT: {0: 1}; Pred: {0: 3}
+3; GT: {0: 9}; Pred: {0: 7}
+4; GT: {0: 2}; Pred: {0: 2}
+5; GT: {0: 8}; Pred: {0: 10}
+6; GT: {0: 12}; Pred: {0: 12}
+7; GT: {0: 11}; Pred: {0: 11}
+8; GT: {0: 2}; Pred: {0: 1}
+9; GT: {0: 8}; Pred: {0: 6}
