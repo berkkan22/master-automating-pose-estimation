@@ -30,10 +30,34 @@ def draw_bounding_boxes(image: np.ndarray, result: PoseEstimationResult) -> np.n
         cv2.rectangle(vis, (box.x1, box.y1), (box.x2, box.y2), color=(255, 0, 0), thickness=2)
     return vis
 
-# def draw_
+def draw_keypoints_with_3d_coords(image: np.ndarray, frame_3d: PoseDepth3D) -> np.ndarray:
+    """Return a copy of image with keypoints drawn and annotated with 3D coordinates."""
+    vis = image.copy()
+
+    # Draw the pinhole camera center (principal point) in red, if intrinsics are available.
+    K = frame_3d.depth_result.intrinsics
+    if K is not None and K.shape == (3, 3):
+        depth_h, depth_w = frame_3d.depth_result.depth.shape[:2]
+        img_h, img_w = image.shape[:2]
+
+        cx_depth = K[0, 2]
+        cy_depth = K[1, 2]
+
+        # Map principal point from depth-map coordinates to original image coordinates.
+        cx_img = int(cx_depth / depth_w * img_w)
+        cy_img = int(cy_depth / depth_h * img_h)
+
+        cv2.circle(vis, (cx_img, cy_img), radius=6, color=(0, 0, 255), thickness=-1)
+
+    for kp3d in frame_3d.keypoints_3d:
+        x_img, y_img = int(kp3d.x_img), int(kp3d.y_img)
+        cv2.circle(vis, (x_img, y_img), radius=5, color=(0, 255, 0), thickness=-1)
+        text = f"({kp3d.X:.2f}, {kp3d.Y:.2f}, {kp3d.Z:.2f})"
+        cv2.putText(vis, text, (x_img + 5, y_img - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0), 1)
+    return vis
 
 
-def run_pipeline(image_path: str, model_path: str, out_dir: str) -> PoseEstimationResult:
+def run_pipeline(image_path: str, model_path: str, out_dir: str) -> PoseDepth3D:
     os.makedirs(out_dir, exist_ok=True)
 
     image = cv2.imread(image_path)
@@ -82,17 +106,22 @@ def run_pipeline(image_path: str, model_path: str, out_dir: str) -> PoseEstimati
         print(f"[Warning] Could not compute world-space coordinates: {e}")
         kps_world = kps_cam
 
-    print("\nKeypoints with depth, camera-space 3D and world-space 3D coordinates:")
-    for kp3d in kps_world:
-        print(
-            f"id={kp3d.id:2d} img=({kp3d.x_img:8.2f},{kp3d.y_img:8.2f}) "
-            f"depth={kp3d.depth:.6f} cam=({kp3d.X},{kp3d.Y},{kp3d.Z}) "
-            f"world=({kp3d.Xw},{kp3d.Yw},{kp3d.Zw})"
-        )    
+    # print("\nKeypoints with depth, camera-space 3D and world-space 3D coordinates:")
+    # for kp3d in kps_world:
+    #     print(
+    #         f"id={kp3d.id:2d} img=({kp3d.x_img:8.2f},{kp3d.y_img:8.2f}) "
+    #         f"depth={kp3d.depth:.6f} cam=({kp3d.X},{kp3d.Y},{kp3d.Z}) "
+    #         f"world=({kp3d.Xw},{kp3d.Yw},{kp3d.Zw})"
+    #     )    
     
     
     print("\nPipeline completed successfully.")
     print(str(frame_3d.keypoints_3d[0]))
+    
+    d_keypoints_visualized = draw_keypoints_with_3d_coords(image, frame_3d)
+    depth_kp_vis_path = os.path.join(out_dir, "keypoints_with_3d_coords.jpg")
+    cv2.imwrite(depth_kp_vis_path, d_keypoints_visualized)
+    print(f"Keypoints with 3D coordinates visualization saved to: {depth_kp_vis_path}")
     
     return frame_3d
 
