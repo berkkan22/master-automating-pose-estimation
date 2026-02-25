@@ -20,7 +20,7 @@ class DepthAnything3Estimator(BaseDepthEstimator):
 
     def __init__(
         self,
-        model_name: str = "da3-large",
+        model_repo: str = "depth-anything/DA3NESTED-GIANT-LARGE-1.1",
         output_dir: Optional[str] = None,
         device: Optional[str] = None,
         process_res: int = 504,
@@ -29,8 +29,8 @@ class DepthAnything3Estimator(BaseDepthEstimator):
         """Create a Depth Anything 3 estimator.
 
         Args:
-            model_name: Model preset name, e.g. "da3-large", "da3-giant",
-                "da3metric-large", etc.
+            model_repo: Hugging Face repo or local path, e.g.
+                "depth-anything/DA3NESTED-GIANT-LARGE-1.1".
             device: Optional device string ("cuda", "cpu", ...). If None,
                 the device is chosen automatically.
             process_res: Processing resolution passed to the DA3 API.
@@ -48,15 +48,17 @@ class DepthAnything3Estimator(BaseDepthEstimator):
         self._process_res = process_res
         self._process_res_method = process_res_method
 
-        # Initialize underlying Depth Anything 3 model
-        self._model = DepthAnything3(model_name=model_name)
-        self._model.to(self._device)
+        # Initialize underlying Depth Anything 3 model from Hugging Face, as in the
+        # official README and demo space.
+        self._model = DepthAnything3.from_pretrained(model_repo)
+        self._model = self._model.to(device=self._device)
         # Ensure the API knows which device to use
         self._model.device = self._device
 
     @property
     def name(self) -> str:
-        return f"depth-anything3-{self._model.model_name}"
+        # When using from_pretrained we expose the repo id via name.
+        return "depth-anything3"
 
     def predict(self, image: np.ndarray) -> DepthEstimationResult:
         """Run Depth Anything 3 on a single image.
@@ -76,15 +78,19 @@ class DepthAnything3Estimator(BaseDepthEstimator):
 
         H, W = image.shape[:2]
 
-        # Depth Anything 3 API expects a list of images
+        # Depth Anything 3 API expects a list of images. We mirror the
+        # default settings from the official README, but allow configuring
+        # process_res / process_res_method. No export is needed just to
+        # obtain the depth map.
         prediction = self._model.inference(
             image=[image],
-            process_res=self._process_res,
-            process_res_method=self._process_res_method,
+            # process_res=self._process_res,
+            # process_res_method=self._process_res_method,
             export_dir=self._output_dir,
             export_format="glb",
             infer_gs=False,
             use_ray_pose=False,
+            conf_thresh_percentile=10.0,
         )
 
         depth_batch = prediction.depth  # shape (N, H, W)
@@ -107,9 +113,22 @@ class DepthAnything3Estimator(BaseDepthEstimator):
             except Exception:
                 is_metric = None
 
+        # Optional intrinsics / extrinsics from DA3 prediction
+        intrinsics = None
+        if getattr(prediction, "intrinsics", None) is not None:
+            if prediction.intrinsics.ndim == 3 and prediction.intrinsics.shape[0] > 0:
+                intrinsics = prediction.intrinsics[0]
+
+        extrinsics = None
+        if getattr(prediction, "extrinsics", None) is not None:
+            if prediction.extrinsics.ndim >= 2 and prediction.extrinsics.shape[0] > 0:
+                extrinsics = prediction.extrinsics[0]
+
         return DepthEstimationResult(
             imageShape=(H, W),
             depth=depth_map,
             isMetric=is_metric,
             confidence=confidence_map,
+            intrinsics=intrinsics,
+            extrinsics=extrinsics,
         )
