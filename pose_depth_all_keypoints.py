@@ -70,10 +70,22 @@ def run_depthpro(
 
     depth = prediction["depth"].detach().cpu().numpy().squeeze()
 
-    if prediction["focallength_px"] is not None:
-        f_px_used = float(prediction["focallength_px"].detach().cpu().item())
-    else:
+    # focallength_px may be a Tensor, NumPy scalar, or Python float
+    f_pred = prediction.get("focallength_px", None)
+    if f_pred is None:
         f_px_used = f_px
+    else:
+        # Handle torch.Tensor, numpy scalar, or plain float
+        try:
+            import torch as _torch  # local import to avoid confusion
+
+            if isinstance(f_pred, _torch.Tensor):
+                f_px_used = float(f_pred.detach().cpu().item())
+            else:
+                f_px_used = float(f_pred)
+        except Exception:
+            # Fallback: just cast whatever came back
+            f_px_used = float(f_pred) if f_pred is not None else f_px
 
     return depth, f_px_used
 
