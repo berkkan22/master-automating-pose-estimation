@@ -11,7 +11,7 @@ from depth_estimator import DepthAnything3Estimator
 # Configuration
 BASE_PATH = "/data/9katirci/master-automating-pose-estimation"
 MODEL_PATH = f"{BASE_PATH}/runs/pose/train2/weights/best.pt"
-IMAGE = f"{BASE_PATH}/DJI_20230823160823_0063_D.jpg"
+IMAGE = f"{BASE_PATH}/datasets/trudi_ds_yolo11_instand_segmentation/test/images/20240503_124036.jpg"
 OUT_DIR = f"{BASE_PATH}/temp_results"
 
 

@@ -82,6 +82,7 @@ class DepthAnything3Estimator(BaseDepthEstimator):
         # default settings from the official README, but allow configuring
         # process_res / process_res_method. No export is needed just to
         # obtain the depth map.
+        # TODO: look into model initializatiopn
         prediction = self._model.inference(
             image=[image],
             # process_res=self._process_res,
