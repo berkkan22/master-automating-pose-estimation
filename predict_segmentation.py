@@ -10,12 +10,12 @@ BASE_PATH = "./runs"  # folder containing YOLO training outputs
 MODEL_PATH = f"{BASE_PATH}/segment/train3/weights/best.pt"
 
 # Test dataset paths
-TEST_ROOT = "./datasets/trudi_ds_yolo11_instand_segmentation/test"
+TEST_ROOT = "./datasets/synthetic_data-v2-coco/test"
 TEST_IMAGES_DIR = os.path.join(TEST_ROOT, "images")
-GT_JSON_DIR = "./trudi_ds/data"  # ground-truth jsons live here
+GT_JSON_DIR = "./synthetic_data-v2/synthetic_data-v2"  # ground-truth jsons live here
 
 # Output directory (per-image visualizations + summary)
-OUT_DIR = "./results/segmentation_predictions_train3"
+OUT_DIR = "./results/segmentation_predictions_train3_syntatic_v2"
 os.makedirs(OUT_DIR, exist_ok=True)
 
 # Labels of interest (filter both prediction + GT)

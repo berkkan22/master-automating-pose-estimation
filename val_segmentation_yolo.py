@@ -2,7 +2,7 @@ from ultralytics import YOLO
 
 # Load a model
 # model = YOLO("yolo11n-seg.pt")  # load an official model
-model = YOLO("runs/segment/train3/weights/best.pt")  # load a custom model
+model = YOLO("runs/segment/train/weights/best.pt")  # load a custom model
 
 # Validate the model
 metrics = model.val()  # no arguments needed, dataset and settings remembered
@@ -14,7 +14,7 @@ metrics.seg.map  # map50-95(M)
 metrics.seg.map50  # map50(M)
 metrics.seg.map75  # map75(M)
 metrics.seg.maps  # a list contains map50-95(M) of each category
-with open("validation_metrics_train3.txt", "w") as f:
+with open("validation_metrics_train.txt", "w") as f:
   f.write("Detection (boxes):\n")
   f.write(f"mAP50-95: {metrics.box.map}\n")
   f.write(f"mAP50: {metrics.box.map50}\n")
