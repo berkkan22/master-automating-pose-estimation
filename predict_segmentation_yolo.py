@@ -7,32 +7,37 @@ import os
 #! use on remote server
 BASE_PAHT = "./runs"
 
-OUTPUT_DIR = "./syntetic_resutls"
+OUTPUT_DIR = "./same_images_predictions"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
-
-model = YOLO(f"{BASE_PAHT}/segment/train2/weights/best.pt")
 
 
 # Predict with the model
 # predict on an image
+
 image_paths = [
-    "./synthetic_data-v2/synthetic_data-v2/v1_default_270/rgb.jpg",
-    "./synthetic_data-v2/synthetic_data-v2/v1_human_140/rgb.jpg",
-    "./synthetic_data-v2/synthetic_data-v2/v1_drone_31/rgb.jpg",
-    "./synthetic_data-v2/synthetic_data-v2/v1_drone_115/rgb.jpg",
-    "./synthetic_data-v2/synthetic_data-v2/v1_default_15/rgb.jpg"
+    "./datasets/trudi_ds_yolo11_instand_segmentation/test/images/DJI_0478_frame_3476.jpg",
 ]
 
-results = model(
-    image_paths,
-    conf=0.50  # confidence threshold, adjust as needed
-)
+train_runs = ["train", "train2", "train3"]
+conf_values = [i / 100 for i in range(30, 101, 5)]  # 0.50, 0.55, ..., 1.00
 
-# Access the results
-for img_path, result in zip(image_paths, results):
-    # xy = result.masks.xy  # mask in polygon format
-    # xyn = result.masks.xyn  # normalized
-    # masks = result.masks.data  # mask in matrix format (num_objects x H x W)
-    folder_name = os.path.basename(os.path.dirname(img_path))
-    save_path = os.path.join(OUTPUT_DIR, f"{folder_name}.jpg")
-    result.save(filename=save_path)
+for train_name in train_runs:
+    model_path = f"{BASE_PAHT}/segment/{train_name}/weights/best.pt"
+    model = YOLO(model_path)
+
+    for conf in conf_values:
+        results = model(
+            image_paths,
+            conf=conf,
+        )
+
+        # Access the results
+        for img_path, result in zip(image_paths, results):
+            # xy = result.masks.xy  # mask in polygon format
+            # xyn = result.masks.xyn  # normalized
+            # masks = result.masks.data  # mask in matrix format (num_objects x H x W)
+            img_name = os.path.basename(img_path)
+            conf_str = f"{conf:.2f}"
+            save_name = f"{train_name}_conf{conf_str}_{img_name}"
+            save_path = os.path.join(OUTPUT_DIR, save_name)
+            result.save(filename=save_path)
